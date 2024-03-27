@@ -7,4 +7,5 @@ const authRouter = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 authRouter.post("/signup", auth_1.signUpUser);
 authRouter.post("/signin", auth_1.signInUser);
+authRouter.post("/validate", auth_1.validateUser);
 exports.default = authRouter;

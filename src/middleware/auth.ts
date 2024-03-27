@@ -6,7 +6,6 @@ import { Request, Response, NextFunction } from "express";
 import { config } from "../config/index.config";
 import { TokenData } from "../interfaces/token.interface";
 
-// Define an interface to extend the Request object
 interface AuthRequest extends Request {
   userId?: number;
 }
@@ -29,7 +28,6 @@ const authMiddleware = (
   try {
     const decoded = jwt.verify(token, config.jwt.secret) as TokenData;
     req.userId = decoded.id;
-    console.log(req.userId, "this is the user id");
     next();
   } catch (error) {
     console.log(error);

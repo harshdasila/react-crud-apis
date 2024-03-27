@@ -1,9 +1,18 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { signInSchema, signUpSchema } from "../schema";
-import { createUser, isUserExists, isUserPresent } from "../services/user.service";
-import jwt from 'jsonwebtoken';
+import {
+  createUser,
+  isUserExists,
+  isUserPresent,
+} from "../services/user.service";
 import { signToken } from "../services/jwt.service";
+import { TokenData } from "../interfaces/token.interface";
+import { config } from "../config/index.config";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+
 const prisma = new PrismaClient();
 
 export const signUpUser = async (req: Request, res: Response) => {
@@ -35,10 +44,10 @@ export const signUpUser = async (req: Request, res: Response) => {
     } else {
       const user = await createUser(email, name, mobileNumber, password);
       const userID = user.user_id;
-      const jwtToken = await signToken(userID)
+      const jwtToken = await signToken(userID);
       return res.status(200).json({
         message: "User Created Successfully.",
-        token: "Bearer " + jwtToken
+        token: "Bearer " + jwtToken,
       });
     }
   } catch (e: any) {
@@ -48,18 +57,17 @@ export const signUpUser = async (req: Request, res: Response) => {
   }
 };
 
-
-export const signInUser = async(req: Request, res: Response) =>{
+export const signInUser = async (req: Request, res: Response) => {
   const body = req.body;
-  const {email,password} = body;
+  const { email, password } = body;
   const signInData = {
     email,
-    password
+    password,
   };
 
   const validationResult = signInSchema.safeParse(signInData);
 
-  if(!validationResult.success){
+  if (!validationResult.success) {
     res.status(422);
     return res.json({
       message: "Invalid Input Types",
@@ -67,26 +75,45 @@ export const signInUser = async(req: Request, res: Response) =>{
     });
   }
 
-  try{
-    const userExists = await isUserExists(email,password);
-    if(userExists){
+  try {
+    const userExists = await isUserExists(email, password);
+    if (userExists) {
       const userId = userExists.user_id;
       const jwtToken = await signToken(userId);
       res.json({
         message: "Token Created",
-        token: "Bearer " + jwtToken
-      })
-    }
-    else{
+        token: "Bearer " + jwtToken,
+      });
+    } else {
       return res.status(401).json({
-        message: "User do not exists."
-      })
+        message: "User do not exists.",
+      });
     }
-  }
-  catch{
+  } catch {
     res.status(402);
-      res.json({
-        message: "Error in creating token."
-      })
+    res.json({
+      message: "Error in creating token.",
+    });
   }
-}
+};
+
+export const validateUser = async (req: Request, res: Response) => {
+  const body = req.body;
+  const token = body.token;
+  const jwtToken = token.split(" ")[1];
+
+  try {
+    if (!jwtToken) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Token is missing" });
+    }
+
+    const decoded = jwt.verify(jwtToken, config.jwt.secret);
+
+    return res.status(200).json({ success: true, message: "Token is valid" });
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ success: false, message: "Invalid token" });
+  }
+};
