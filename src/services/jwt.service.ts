@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/index.config';
 
 
-export const signToken = async (userId: number): Promise<string> => {
+export const signToken = async (userId: number, user_role_id: number): Promise<string> => {
     try {
-        const jwtToken = jwt.sign({ id: userId }, config.jwt.secret, { expiresIn: '7d' });
+        const jwtToken = jwt.sign({ id: userId, role: user_role_id }, config.jwt.secret, { expiresIn: '7d' });
         
         return jwtToken;
     } catch (error) {

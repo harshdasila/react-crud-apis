@@ -11,11 +11,15 @@ const jwt_service_1 = require("../services/jwt.service");
 const index_config_1 = require("../config/index.config");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const saltRounds = 10;
 dotenv_1.default.config();
 const prisma = new client_1.PrismaClient();
 const signUpUser = async (req, res) => {
     const data = req.body;
     const { email, password, name, mobileNumber } = data;
+    const hashedPassword = await bcrypt_1.default.hash(password, saltRounds);
+    console.log(hashedPassword);
     const signUpData = {
         name,
         email,
@@ -23,6 +27,12 @@ const signUpUser = async (req, res) => {
         mobileNumber,
     };
     const validationResult = schema_1.signUpSchema.safeParse(signUpData);
+    // const hashedSignUpData = {
+    //   name,
+    //   email,
+    //   hashedPassword,
+    //   mobileNumber,
+    // }
     if (!validationResult.success) {
         res.status(422);
         return res.json({
@@ -31,16 +41,17 @@ const signUpUser = async (req, res) => {
         });
     }
     try {
-        const userPresent = (0, user_service_1.isUserPresent)(email);
-        if (await userPresent) {
+        const userPresent = await (0, user_service_1.isUserPresent)(email);
+        if (userPresent) {
             return res.status(409).json({
                 message: `User with email - ${email} already present.`,
             });
         }
         else {
-            const user = await (0, user_service_1.createUser)(email, name, mobileNumber, password);
+            const user = await (0, user_service_1.createUser)(email, name, mobileNumber, hashedPassword);
             const userID = user.user_id;
-            const jwtToken = await (0, jwt_service_1.signToken)(userID);
+            const user_role_id = user.user_role_id;
+            const jwtToken = await (0, jwt_service_1.signToken)(userID, user_role_id);
             return res.status(200).json({
                 message: "User Created Successfully.",
                 token: "Bearer " + jwtToken,
@@ -73,7 +84,8 @@ const signInUser = async (req, res) => {
         const userExists = await (0, user_service_1.isUserExists)(email, password);
         if (userExists) {
             const userId = userExists.user_id;
-            const jwtToken = await (0, jwt_service_1.signToken)(userId);
+            const user_role_id = userExists.user_role_id;
+            const jwtToken = await (0, jwt_service_1.signToken)(userId, user_role_id);
             res.json({
                 message: "Token Created",
                 token: "Bearer " + jwtToken,

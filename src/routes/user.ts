@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { deleteUser, listUsers, showUserDetails } from "../controllers/user";
+import { addUser, deleteUser, listUsers, showUserDetails, updateUser } from "../controllers/user";
 import authMiddleware from "../middleware/auth";
 
 const userRouter = Router();
@@ -12,7 +12,9 @@ userRouter.post('/list',authMiddleware, deleteUser)
 
 userRouter.get('/user-details/:userId', authMiddleware, showUserDetails);
 
+userRouter.put('/update/:userId', authMiddleware, updateUser);
 
-userRouter
+userRouter.post('/add-user', authMiddleware, addUser);
+
 
 export default userRouter;

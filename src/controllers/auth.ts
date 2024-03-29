@@ -11,6 +11,8 @@ import { TokenData } from "../interfaces/token.interface";
 import { config } from "../config/index.config";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import bcrypt from 'bcrypt';
+const saltRounds = 10;
 dotenv.config();
 
 const prisma = new PrismaClient();
@@ -18,6 +20,8 @@ const prisma = new PrismaClient();
 export const signUpUser = async (req: Request, res: Response) => {
   const data = req.body;
   const { email, password, name, mobileNumber } = data;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  console.log(hashedPassword)
   const signUpData = {
     name,
     email,
@@ -36,15 +40,16 @@ export const signUpUser = async (req: Request, res: Response) => {
   }
 
   try {
-    const userPresent = isUserPresent(email);
-    if (await userPresent) {
+    const userPresent = await isUserPresent(email);
+    if ( userPresent) {
       return res.status(409).json({
         message: `User with email - ${email} already present.`,
       });
     } else {
-      const user = await createUser(email, name, mobileNumber, password);
+      const user = await createUser(email, name, mobileNumber, hashedPassword);
       const userID = user.user_id;
-      const jwtToken = await signToken(userID);
+      const user_role_id = user.user_role_id!;
+      const jwtToken = await signToken(userID,user_role_id);
       return res.status(200).json({
         message: "User Created Successfully.",
         token: "Bearer " + jwtToken,
@@ -79,7 +84,8 @@ export const signInUser = async (req: Request, res: Response) => {
     const userExists = await isUserExists(email, password);
     if (userExists) {
       const userId = userExists.user_id;
-      const jwtToken = await signToken(userId);
+      const user_role_id = userExists.user_role_id!;
+      const jwtToken = await signToken(userId,user_role_id);
       res.json({
         message: "Token Created",
         token: "Bearer " + jwtToken,

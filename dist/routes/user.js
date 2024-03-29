@@ -12,5 +12,6 @@ const prisma = new client_1.PrismaClient();
 userRouter.get('/list', auth_1.default, user_1.listUsers);
 userRouter.post('/list', auth_1.default, user_1.deleteUser);
 userRouter.get('/user-details/:userId', auth_1.default, user_1.showUserDetails);
-userRouter;
+userRouter.put('/update/:userId', auth_1.default, user_1.updateUser);
+userRouter.post('/add-user', auth_1.default, user_1.addUser);
 exports.default = userRouter;

@@ -38,5 +38,6 @@ export const signUpSchema = z
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[a-zA-Z\d!@#$%^&*()_+]+$/,
         "Password must contain at least 1 lowercase letter, 1 uppercase letter, and 1 special character."
-      )
+      ),
+    userRole: z.optional(z.number())
   })

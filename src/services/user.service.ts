@@ -1,14 +1,13 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 export const isUserPresent = async (email: string) => {
-  const userPresent = await prisma.um_users.findFirst({
+  const userPresent = await prisma.um_users.findUnique({
     where: {
       user_email: email,
-      user_deleted_at: {
-        not: null,
-      },
+      user_deleted_at: null
     },
   });
   return userPresent;
@@ -18,7 +17,8 @@ export const createUser = async (
   email: string,
   name: string,
   mobileNumber: string,
-  password: string
+  password: string,
+  userRole: number = 5
 ) => {
   try {
     const createdUser = await prisma.um_users.create({
@@ -27,6 +27,7 @@ export const createUser = async (
         user_name: name,
         user_number: mobileNumber,
         user_password: password,
+        user_role_id: userRole
       },
     });
     return createdUser;
@@ -40,14 +41,24 @@ export const isUserExists = async (email: string, password: string) => {
     const user = await prisma.um_users.findUnique({
       where: {
         user_email: email,
-        user_password: password,
+        // user_password: password,
         user_deleted_at: null,
       },
       select: {
         user_id: true,
+        user_role_id: true,
+        user_password: true
       },
+      
+
     });
-    return user;
+    const passwordMatch = await bcrypt.compare(password, user!.user_password);
+    if(passwordMatch){
+      return user;
+    }
+    else{
+      return false;
+    }
   } catch (error) {
     throw new Error("Error in finding user.");
   }
@@ -69,30 +80,82 @@ export const deleteUserService = async (userId: number) => {
   }
 };
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (
+  sortBy: string,
+  sortOrder: string,
+  searchQuery: string,
+  recordsPerPage: number,
+  page: number
+) => {
   try {
     const listData = await prisma.um_users.findMany({
       where: {
         user_deleted_at: null,
+        OR: [
+          { user_name: { contains: searchQuery } },
+          { user_email: { contains: searchQuery } },
+          { user_number: { contains: searchQuery } },
+        ],
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      take: recordsPerPage,
+      skip: (page-1)*recordsPerPage, 
+    });
+
+    const totalUser = await prisma.um_users.findMany({
+      where: {
+        user_deleted_at: null,
+        OR: [
+          { user_name: { contains: searchQuery } },
+          { user_email: { contains: searchQuery } },
+          { user_number: { contains: searchQuery } },
+        ],
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
       },
     });
-    return listData;
+    return {listData,totalUser};
   } catch (e) {
-    throw new Error("Error in fetching data")
+    throw new Error("Error in fetching data");
   }
 };
 
-export const getUserDetails = async(userId: number) => {
-  try{
+export const getUserDetails = async (userId: number) => {
+  try {
     const userData = await prisma.um_users.findUnique({
       where: {
         user_id: userId,
       },
     });
     return userData;
+  } catch (e) {
+    throw new Error("Error in fetching data");
   }
-  catch(e){
-    throw new Error("Error in fetching data")
+};
+
+export const updateUserDetails = async(userId: number, body: any) => {
+  try{
+
+    const userData = await prisma.um_users.update({
+      where:{
+        user_id: userId,
+      },
+      data:{
+        user_email: body.email,
+        user_name: body.name,
+        user_number: body.number,
+        user_updated_at: {
+          set: new Date()
+        }
+      }
+    })
+    return userData;
   }
-  
+  catch(error){
+    console.error('Error updating user details:', error);
+    throw new Error('Failed to update user details');
+  }
 }

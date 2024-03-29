@@ -6,9 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.signToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_config_1 = require("../config/index.config");
-const signToken = async (userId) => {
+const signToken = async (userId, user_role_id) => {
     try {
-        const jwtToken = jsonwebtoken_1.default.sign({ id: userId }, index_config_1.config.jwt.secret, { expiresIn: '7d' });
+        const jwtToken = jsonwebtoken_1.default.sign({ id: userId, role: user_role_id }, index_config_1.config.jwt.secret, { expiresIn: '7d' });
         return jwtToken;
     }
     catch (error) {
