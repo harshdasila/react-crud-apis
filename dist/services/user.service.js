@@ -46,7 +46,7 @@ const isUserExists = async (email, password) => {
             select: {
                 user_id: true,
                 user_role_id: true,
-                user_password: true
+                user_password: true,
             },
         });
         const passwordMatch = await bcrypt_1.default.compare(password, user.user_password);
@@ -140,9 +140,7 @@ const updateUserDetails = async (userId, body) => {
                 user_email: body.email,
                 user_name: body.name,
                 user_number: body.number,
-                user_updated_at: {
-                    set: new Date()
-                }
+                user_role_id: Number(body.roleId)
             }
         });
         return userData;

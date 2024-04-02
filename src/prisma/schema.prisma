@@ -20,7 +20,7 @@ model um_users {
   user_password   String    @db.VarChar(250)
   user_number     String    @db.VarChar(10)
   user_created_at DateTime  @default(now())
-  user_updated_at DateTime  @default(now())
+  user_updated_at DateTime  @updatedAt
   user_deleted_at DateTime?
   um_roles        um_roles? @relation(fields: [user_role_id], references: [role_id])
   user_role_id      Int? @default(5)
@@ -33,7 +33,7 @@ model um_roles {
   role_name       String     @db.VarChar(255)
   role_slug       String     @unique @db.VarChar(155)
   role_created_at DateTime   @default(now())
-  role_updated_at DateTime   @default(now())
+  role_updated_at DateTime   @updatedAt
   role_deleted_at DateTime?
   users           um_users[]
 
@@ -47,6 +47,6 @@ model um_email_templates {
   et_subject String @db.VarChar(255)
   et_content String @db.VarChar(5000)
   et_created_at DateTime @default(now())
-  et_updated_at DateTime @default(now())
+  et_updated_at DateTime @updatedAt
   et_deleted_at DateTime?
 }

@@ -19,7 +19,6 @@ const signUpUser = async (req, res) => {
     const data = req.body;
     const { email, password, name, mobileNumber } = data;
     const hashedPassword = await bcrypt_1.default.hash(password, saltRounds);
-    console.log(hashedPassword);
     const signUpData = {
         name,
         email,
@@ -27,12 +26,6 @@ const signUpUser = async (req, res) => {
         mobileNumber,
     };
     const validationResult = schema_1.signUpSchema.safeParse(signUpData);
-    // const hashedSignUpData = {
-    //   name,
-    //   email,
-    //   hashedPassword,
-    //   mobileNumber,
-    // }
     if (!validationResult.success) {
         res.status(422);
         return res.json({
@@ -52,9 +45,14 @@ const signUpUser = async (req, res) => {
             const userID = user.user_id;
             const user_role_id = user.user_role_id;
             const jwtToken = await (0, jwt_service_1.signToken)(userID, user_role_id);
+            const userData = {
+                id: user.user_id,
+                role_id: user.user_role_id
+            };
             return res.status(200).json({
                 message: "User Created Successfully.",
                 token: "Bearer " + jwtToken,
+                userData: userData
             });
         }
     }
@@ -77,7 +75,7 @@ const signInUser = async (req, res) => {
         res.status(422);
         return res.json({
             message: "Invalid Input Types",
-            errors: validationResult.error.errors, // Optionally send the validation errors
+            errors: validationResult.error.errors,
         });
     }
     try {
@@ -86,13 +84,18 @@ const signInUser = async (req, res) => {
             const userId = userExists.user_id;
             const user_role_id = userExists.user_role_id;
             const jwtToken = await (0, jwt_service_1.signToken)(userId, user_role_id);
+            const userData = {
+                id: userExists.user_id,
+                role_id: userExists.user_role_id
+            };
             res.json({
                 message: "Token Created",
                 token: "Bearer " + jwtToken,
+                userData: userData
             });
         }
         else {
-            return res.status(401).json({
+            return res.status(500).json({
                 message: "User do not exists.",
             });
         }

@@ -17,11 +17,12 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
+
+
 export const signUpUser = async (req: Request, res: Response) => {
   const data = req.body;
   const { email, password, name, mobileNumber } = data;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
-  console.log(hashedPassword)
   const signUpData = {
     name,
     email,
@@ -50,9 +51,14 @@ export const signUpUser = async (req: Request, res: Response) => {
       const userID = user.user_id;
       const user_role_id = user.user_role_id!;
       const jwtToken = await signToken(userID,user_role_id);
+      const userData = {
+        id: user.user_id,
+        role_id: user.user_role_id
+      }
       return res.status(200).json({
         message: "User Created Successfully.",
         token: "Bearer " + jwtToken,
+        userData: userData
       });
     }
   } catch (e: any) {
@@ -76,7 +82,7 @@ export const signInUser = async (req: Request, res: Response) => {
     res.status(422);
     return res.json({
       message: "Invalid Input Types",
-      errors: validationResult.error.errors, // Optionally send the validation errors
+      errors: validationResult.error.errors,
     });
   }
 
@@ -86,12 +92,18 @@ export const signInUser = async (req: Request, res: Response) => {
       const userId = userExists.user_id;
       const user_role_id = userExists.user_role_id!;
       const jwtToken = await signToken(userId,user_role_id);
+     const userData = {
+      id: userExists.user_id,
+      role_id: userExists.user_role_id
+
+     }
       res.json({
         message: "Token Created",
         token: "Bearer " + jwtToken,
+        userData: userData
       });
     } else {
-      return res.status(401).json({
+      return res.status(500).json({
         message: "User do not exists.",
       });
     }
