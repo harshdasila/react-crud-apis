@@ -76,7 +76,7 @@ export const signInUser = async (req: Request, res: Response) => {
     password,
   };
 
-  const validationResult = signInSchema.safeParse(signInData);
+  const validationResult = signInSchema.safeParse(signInData);  
 
   if (!validationResult.success) {
     res.status(422);
@@ -95,7 +95,6 @@ export const signInUser = async (req: Request, res: Response) => {
      const userData = {
       id: userExists.user_id,
       role_id: userExists.user_role_id
-
      }
       res.json({
         message: "Token Created",

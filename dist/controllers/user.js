@@ -35,7 +35,7 @@ const listUsers = async (req, res) => {
 };
 exports.listUsers = listUsers;
 const deleteUser = async (req, res) => {
-    const userId = req.body.userId;
+    const userId = Number(req.params.userId);
     try {
         const deletedUser = (0, user_service_1.deleteUserService)(userId);
         res.status(200).json({

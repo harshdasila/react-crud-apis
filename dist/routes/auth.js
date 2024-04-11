@@ -7,12 +7,18 @@ const authRouter = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 /**
  * @openapi
+ * tags:
+ *   - name: Authentication
+ *     description: APIs related to user authentication
+ */
+/**
+ * @openapi
  * schemes:
  *   - http
  * /auth/signup:
  *   post:
  *     tags:
- *       - sign up
+ *       - Authentication
  *     description: User Signup with email, password, name, and mobile number
  *     requestBody:
  *       required: true
@@ -88,7 +94,7 @@ authRouter.post("/signup", auth_1.signUpUser);
  * /auth/signin:
  *   post:
  *     tags:
- *       - sign in
+ *       - Authentication
  *     description: User Login with credentials
  *     requestBody:
  *       required: true
@@ -97,7 +103,7 @@ authRouter.post("/signup", auth_1.signUpUser);
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               email:
  *                 type: string
  *               password:
  *                 type: string
@@ -122,5 +128,56 @@ authRouter.post("/signup", auth_1.signUpUser);
  *         description: Internal Server Error. Something went wrong on the server.
  */
 authRouter.post("/signin", auth_1.signInUser);
+/**
+ * @openapi
+ * /auth/validate:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     description: Validate JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       '400':
+ *         description: Bad Request. Token is missing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       '401':
+ *         description: Unauthorized. Invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
 authRouter.post("/validate", auth_1.validateUser);
 exports.default = authRouter;

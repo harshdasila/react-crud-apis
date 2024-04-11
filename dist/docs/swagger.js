@@ -15,7 +15,21 @@ const options = {
         },
         servers: [
             {
-                url: `https://localhost:3001`,
+                url: `http://localhost:3001`,
+            },
+        ],
+        components: {
+            securitySchemes: {
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
+        },
+        security: [
+            {
+                BearerAuth: [], // This can be applied globally to all endpoints
             },
         ],
     },
@@ -30,7 +44,8 @@ function swaggerDocs(app, port) {
     }));
     app.get("api-docs.json", (req, res) => {
         res.setHeader("Content-Type", "application/json");
+        res.send(swaggerSpec);
     });
-    console.log(`swagger docs at https://localhost:${port}`);
+    console.log(`swagger docs at http://localhost:${port}`);
 }
 exports.default = swaggerDocs;

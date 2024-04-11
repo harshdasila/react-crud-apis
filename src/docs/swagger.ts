@@ -46,7 +46,7 @@ function swaggerDocs(app: Express, port: number) {
     res.setHeader("Content-Type", "application/json");
     res.send(swaggerSpec);
   });
-  console.log(`swagger docs at http://localhost:${port}`);
+  console.log(`swagger docs at http://localhost:${port}/api-docs`);
 }
 
 export default swaggerDocs;

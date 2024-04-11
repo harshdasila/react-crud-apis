@@ -80,23 +80,21 @@ userRouter.get("/list", authMiddleware, listUsers);
 
 /**
  * @openapi
- * /user/list:
- *   post:
+ * /user/list/{userId}:
+ *   delete:
  *     tags:
  *       - Users
  *     summary: Delete User
  *     description: Delete a user by ID
  *     security:
  *       - BearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userId:
- *                 type: string
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: ID of the user to delete
+ *         schema:
+ *           type: integer
  *     responses:
  *       '200':
  *         description: User deleted successfully
@@ -113,7 +111,8 @@ userRouter.get("/list", authMiddleware, listUsers);
  *         description: Error in deleting user
  */
 
-userRouter.post("/list", authMiddleware, deleteUser);
+
+userRouter.delete("/list/:userId", authMiddleware, deleteUser);
 
 /**
  * @openapi
